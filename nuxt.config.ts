@@ -2,9 +2,19 @@
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 export default defineNuxtConfig({
+  typescript: {
+    tsConfig: {
+      exclude: ['../service-worker'],
+    },
+  },
   devtools: { enabled: true },
   modules: ['@vite-pwa/nuxt'],
   pwa: {
+    // mode: 'development',
+    registerType: 'autoUpdate',
+    strategies: 'injectManifest',
+    srcDir: 'service-worker',
+    filename: 'index.ts',
     manifest: {
       name: 'Vite PWA',
       short_name: 'PWA',
@@ -33,6 +43,16 @@ export default defineNuxtConfig({
     },
     injectManifest: {
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+      minify: false,
+      buildPlugins: {
+        vite: [
+          sentryVitePlugin({
+            release: { name: 'testing1' },
+            project: 'vite-pwa',
+            telemetry: false,
+          })
+        ]
+      }
     },
     client: {
       installPrompt: true,
@@ -50,6 +70,13 @@ export default defineNuxtConfig({
   },
   ssr: true,
   vite: {
+    optimizeDeps: {
+      include: [
+        'workbox-core',
+        'workbox-precaching',
+        'workbox-routing',
+      ],
+    },
     plugins: [
       sentryVitePlugin({
         release: { name: 'testing1' },
